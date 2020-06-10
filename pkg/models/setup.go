@@ -1,11 +1,9 @@
-package rolemodels
+package models
 
-// Event is well an event duh
-type Event struct {
-	ID          string `json:"ID"`
-	Title       string `json:"Title"`
-	Description string `json:"Description"`
+// Article is well an article duh
+type Article struct {
+	ID      string `json:"Id"`
+	Title   string `json:"Title"`
+	Desc    string `json:"desc"`
+	Content string `jsons"content"`
 }
-
-// AllEvents is an array of events
-type AllEvents []Event

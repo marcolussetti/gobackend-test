@@ -5,7 +5,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -13,96 +12,40 @@ import (
 	. "github.com/marcolussetti/gobackend-test/pkg/models"
 )
 
-var events = AllEvents{
-	{
-		ID:          "1",
-		Title:       "Introduction to Golang",
-		Description: "Come join us for a chance to learn how golang works and get to eventually try it out",
-	},
-}
+// Articles represents the fake collection of blog entries
+var Articles []Article
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome home!")
+	fmt.Println("Endpoint Hit: /")
 }
 
-func createEvent(w http.ResponseWriter, r *http.Request) {
-	var newEvent Event
-	reqBody, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		fmt.Fprintf(w, "Kindly enter data with the event title and description only in order to update")
-	}
-
-	json.Unmarshal(reqBody, &newEvent)
-	events = append(events, newEvent)
-	w.WriteHeader(http.StatusCreated)
-
-	json.NewEncoder(w).Encode(newEvent)
+func returnAllArticles(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint Hit: /articles")
+	json.NewEncoder(w).Encode(Articles)
 }
 
-func getOneEvent(w http.ResponseWriter, r *http.Request) {
-	eventID := mux.Vars(r)["id"]
+func returnSingleArticle(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	articleID := vars["id"]
+	fmt.Println("Endpoint Hit: /article/" + articleID)
 
-	for _, singleEvent := range events {
-		if singleEvent.ID == eventID {
-			json.NewEncoder(w).Encode(singleEvent)
+	for _, article := range Articles {
+		if article.ID == articleID {
+			json.NewEncoder(w).Encode(article)
 		}
 	}
 }
-
-func getAllEvents(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(events)
-}
-
-func updateEvent(w http.ResponseWriter, r *http.Request) {
-	eventID := mux.Vars(r)["id"]
-	var updatedEvent Event
-
-	reqBody, err := ioutil.ReadAll(r.Body)
-	fmt.Printf("Whatever " + string(reqBody))
-	if err != nil {
-		fmt.Fprintf(w, "Kindly enter data with the event title and description only in order to update")
-	}
-	json.Unmarshal(reqBody, &updatedEvent)
-
-	for i, singleEvent := range events {
-		if singleEvent.ID == eventID {
-			singleEvent.Title = updatedEvent.Title
-			singleEvent.Description = updatedEvent.Description
-			events[i] = singleEvent
-			json.NewEncoder(w).Encode(events[i])
-		}
-	}
-
-}
-
-// func updateEvent(w http.ResponseWriter, r *http.Request) {
-// 	// Get the ID from the url
-// 	eventID := mux.Vars(r)["id"]
-// 	var updatedEvent Event
-// 	// Convert r.Body into a readable formart
-// 	reqBody, err := ioutil.ReadAll(r.Body)
-// 	if err != nil {
-// 		fmt.Fprintf(w, "Kindly enter data with the event title and description only in order to update")
-// 	}
-
-// 	json.Unmarshal(reqBody, &updatedEvent)
-
-// 	for i, singleEvent := range events {
-// 		if singleEvent.ID == eventID {
-// 			singleEvent.Title = updatedEvent.Title
-// 			singleEvent.Description = updatedEvent.Description
-// 			events[i] = singleEvent
-// 			json.NewEncoder(w).Encode(singleEvent)
-// 		}
-// 	}
-// }
 
 func main() {
+	Articles = []Article{
+		Article{ID: "1", Title: "Hello", Desc: "Article Description", Content: "Article Content"},
+		Article{ID: "2", Title: "Hello 2", Desc: "Article Description", Content: "Article Content"},
+	}
+
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", homeHandler)
-	router.HandleFunc("/event", createEvent).Methods("POST")
-	router.HandleFunc("/events", getAllEvents).Methods("GET")
-	router.HandleFunc("/events/{id}", getOneEvent).Methods("GET")
-	router.HandleFunc("/events/{id}", updateEvent).Methods("PATCH")
+	router.HandleFunc("/articles", returnAllArticles)
+	router.HandleFunc("/article/{id}", returnSingleArticle)
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
