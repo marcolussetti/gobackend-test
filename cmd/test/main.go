@@ -62,6 +62,30 @@ func deleteArticle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func updateArticle(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	articleID := vars["id"]
+	fmt.Println("Endpoint POST: /article/" + articleID)
+
+	var newArticle Article
+
+	json.NewDecoder(r.Body).Decode(&newArticle)
+	newArticle.ID = articleID
+
+	for i, article := range Articles {
+		if article.ID == articleID {
+			var newArticles []Article
+			newArticles = append(Articles[:i], newArticle)
+			newArticles = append(newArticles, Articles[i+1:]...)
+			Articles = newArticles
+
+			json.NewEncoder(w).Encode(newArticle)
+		}
+	}
+
+}
+
 func main() {
 	Articles = []Article{
 		Article{ID: "1", Title: "Hello", Desc: "Article Description", Content: "Article Content"},
@@ -74,5 +98,6 @@ func main() {
 	router.HandleFunc("/article/{id}", returnSingleArticle).Methods("GET")
 	router.HandleFunc("/article", createArticle).Methods("POST")
 	router.HandleFunc("/article/{id}", deleteArticle).Methods("DELETE")
+	router.HandleFunc("/article/{id}", updateArticle).Methods("POST")
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
