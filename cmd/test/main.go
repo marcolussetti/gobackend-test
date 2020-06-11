@@ -94,10 +94,15 @@ func main() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", homeHandler).Methods("GET")
+
+	// List methods
 	router.HandleFunc("/article", returnAllArticles).Methods("GET")
-	router.HandleFunc("/article/{id}", returnSingleArticle).Methods("GET")
 	router.HandleFunc("/article", createArticle).Methods("POST")
-	router.HandleFunc("/article/{id}", deleteArticle).Methods("DELETE")
+
+	// Single article methods
 	router.HandleFunc("/article/{id}", updateArticle).Methods("POST")
+	router.HandleFunc("/article/{id}", returnSingleArticle).Methods("GET")
+	router.HandleFunc("/article/{id}", deleteArticle).Methods("DELETE")
+
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
