@@ -10,4 +10,4 @@ Learning a bit about building backends in golang
 
 Basically it's two files:
 - `cmd/test/main.go` is where the code if you will is
-- `cmd/pkg/models/setup.go` is where the model if you will is
+- `pkg/models/setup.go` is where the model if you will is
